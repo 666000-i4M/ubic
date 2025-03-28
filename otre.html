@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ubicación en tiempo real</title>
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css" rel="stylesheet" />
+</head>
+<body>
+  <div id="map" style="width: 100%; height: 500px;"></div>
+
+  <script type="module">
+    // Importar Firebase SDK v9
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+    import { getDatabase, ref, onChildAdded } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
+
+    // Tu configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAKWSxmqy3nJVEA9BUqQgm_6_pnWVCxIUs",
+      authDomain: "basesita-d8f29.firebaseapp.com",
+      databaseURL: "https://basesita-d8f29-default-rtdb.firebaseio.com",
+      projectId: "basesita-d8f29",
+      storageBucket: "basesita-d8f29.firebasestorage.app",
+      messagingSenderId: "687161340169",
+      appId: "1:687161340169:web:430d79ac7eee6e3550a3d8",
+      measurementId: "G-YFB4RP4KED"
+    };
+
+    // Inicializa Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Configurar Mapbox
+    mapboxgl.accessToken = 'pk.eyJ1IjoiamF6eno3NzciLCJhIjoiY204Zm50ajhuMGc3eTJtcHppcWtvM3ppeiJ9.QMV-1IRwkuDMlMfgdFommQ';
+
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/streets-v11',
+      center: [-74.5, 40], // Coordenadas iniciales
+      zoom: 9
+    });
+
+    // Crear un marcador único
+    let marker = new mapboxgl.Marker()
+      .setLngLat([-74.5, 40]) // Coordenadas iniciales
+      .addTo(map);
+
+    // Referencia a la base de datos en Firebase
+    const locationRef = ref(database, 'ubicaciones');
+
+    // Escuchar cambios en la base de datos
+    onChildAdded(locationRef, (snapshot) => {
+      const data = snapshot.val();
+      const lat = data.latitud;
+      const lng = data.longitud;
+
+      // Actualizar la posición del marcador
+      marker.setLngLat([lng, lat]);
+
+      // Mover el mapa al nuevo punto
+      map.flyTo({ center: [lng, lat] });
+    });
+  </script>
+
+</body>
+</html>
